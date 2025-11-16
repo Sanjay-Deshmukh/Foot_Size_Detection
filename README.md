@@ -1,4 +1,4 @@
-# Foot Size Detector - Flask Web UI
+# Foot Size Detector 
 
 A professional, modern web application built with Flask and beautiful HTML/CSS/JavaScript.
 
