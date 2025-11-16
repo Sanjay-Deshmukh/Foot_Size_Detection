@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦶 Foot Size Detection System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 20px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            font-weight: 300;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Card Title */
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title i {
+            font-size: 1.3rem;
+        }
+
+        /* File Upload Area */
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 50px 30px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: white;
+        }
+
+        .file-upload-area:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+
+        .file-upload-area.dragover {
+            border-color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .file-upload-icon {
+            font-size: 5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+        }
+
+        .file-upload-area h5 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .file-upload-area p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 12px;
+            padding: 14px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(139, 92, 246, 0.8));
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.8), rgba(249, 115, 22, 0.8));
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.9), rgba(249, 115, 22, 0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(251, 146, 60, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.8), rgba(22, 163, 74, 0.8));
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(22, 163, 74, 0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Image Preview */
+        .image-preview {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            color: white;
+            margin: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-card.orange {
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.3), rgba(249, 115, 22, 0.3));
+        }
+
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 15px 0;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            letter-spacing: -2px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 15px;
+            border: none;
+            padding: 20px 25px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: white;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: white;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: white;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-left: 3px solid rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .instructions ol {
+            margin: 0;
+            padding-left: 25px;
+        }
+
+        .instructions li {
+            margin: 12px 0;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Technical Details */
+        .technical-details {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .technical-details h6 {
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .technical-details p {
+            margin: 8px 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 60px;
+        }
+
+        .spinner-border {
+            width: 4rem;
+            height: 4rem;
+            border-width: 0.4em;
+            border-color: rgba(255, 255, 255, 0.3);
+            border-right-color: white;
+        }
+
+        .loading-spinner p {
+            color: white;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Info Text */
+        .info-text {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .glass-card {
+                padding: 20px;
+            }
+
+            .metric-value {
+                font-size: 2.5rem;
+            }
+
+            .file-upload-icon {
+                font-size: 4rem;
+            }
+        }
+
+        /* Image Info */
+        #imageInfo {
+            margin-top: 15px;
+        }
+
+        /* Results Container */
+        .results-container {
+            display: none;
+        }
+
+        .results-container.show {
+            display: block;
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-shoe-prints"></i> Foot Size Detection System</h1>
+            <p>Professional Computer Vision-Based Foot Measurement</p>
+        </div>
+
+        <div class="row">
+            <!-- Left Column - Upload -->
+            <div class="col-lg-4">
+                <div class="glass-card">
+                    <h3 class="card-title">
+                        <i class="fas fa-cog"></i> Upload
+                    </h3>
+
+                    <!-- File Upload Area -->
+                    <div class="file-upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                        <h5>Drag and drop image</h5>
+                        <p>or click to browse</p>
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-primary" onclick="document.getElementById('imageInput').click()">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                        <button class="btn btn-secondary" onclick="processDefaultImage()">
+                            <i class="fas fa-image"></i> Use Default
+                        </button>
+                    </div>
+
+                    <div id="imageInfo" class="mt-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> <span id="imageName"></span>
+                        </div>
+                    </div>
+
+                    <!-- Process Button -->
+                    <div class="mt-4">
+                        <button class="btn btn-warning w-100 btn-lg" id="processBtn" onclick="processImage()" disabled>
+                            <i class="fas fa-search"></i> Process Image
+                        </button>
+                    </div>
+
+                    <!-- About Button -->
+                    <div class="mt-3">
+                        <button class="btn btn-secondary w-100" onclick="showAbout()">
+                            <i class="fas fa-clock"></i> About
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Results -->
+            <div class="col-lg-8">
+                <div class="glass-card">
+                    <h3 class="card-title">
+                        <i class="fas fa-check-circle"></i> Results
+                    </h3>
+
+                    <!-- Loading Spinner -->
+                    <div class="loading-spinner" id="loadingSpinner">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Processing image... Please wait</p>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div id="imagePreview" style="display: none;">
+                        <img id="previewImage" class="image-preview" alt="Preview">
+                    </div>
+
+                    <!-- Results Container -->
+                    <div class="results-container" id="resultsContainer">
+                        <!-- Success Message -->
+                        <div class="alert alert-success" id="successAlert" style="display: none;">
+                            <i class="fas fa-check-circle"></i> <strong>Processing Complete!</strong>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div class="alert alert-danger" id="errorAlert" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
+                        </div>
+
+                        <!-- Metrics -->
+                        <div class="row" id="metricsRow" style="display: none;">
+                            <div class="col-md-6">
+                                <div class="metric-card">
+                                    <div class="metric-label">FOOT LENGTH</div>
+                                    <div class="metric-value" id="footLength">-</div>
+                                    <div class="metric-label">CENTIMETERS</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="metric-card orange">
+                                    <div class="metric-label">UK SHOE SIZE</div>
+                                    <div class="metric-value" id="shoeSize">-</div>
+                                    <div class="metric-label">SIZE</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Annotated Image -->
+                        <div id="annotatedImageContainer" style="display: none; margin-top: 30px;">
+                            <h5 class="card-title">
+                                <i class="fas fa-image"></i> Processed Image
+                            </h5>
+                            <img id="annotatedImage" class="image-preview" alt="Annotated Result">
+                            <div class="d-grid gap-2 mt-3">
+                                <button class="btn btn-success" onclick="downloadResult()">
+                                    <i class="fas fa-download"></i> Download Result Image
+                                </button>
+                                <button class="btn btn-primary" onclick="downloadReport()">
+                                    <i class="fas fa-file-pdf"></i> Download Full Report
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Technical Details -->
+                        <div class="technical-details" id="technicalDetails" style="display: none;">
+                            <h6><i class="fas fa-cog"></i> Technical Details</h6>
+                            <p><strong>Pixel Distance:</strong> <span id="pixelDistance">-</span> px</p>
+                            <p><strong>Scale Factor:</strong> <span id="scaleFactor">-</span> mm/pixel</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Foot Size Detection System | Built with Flask & OpenCV</p>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+                    <h5 class="modal-title" style="color: white; font-weight: 600;">About</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="color: white;">
+                    <p class="info-text">
+                        This system uses computer vision to measure foot length and determine UK shoe size. 
+                        Place a UK 1p coin (22mm diameter) next to the foot for scale reference.
+                    </p>
+                    <div class="instructions mt-3">
+                        <strong>Instructions:</strong>
+                        <ol>
+                            <li>Select an image with a foot and a coin</li>
+                            <li>Click "Process Image"</li>
+                            <li>A window will open - click on <strong>HEEL</strong> first</li>
+                            <li>Then click on <strong>TOE</strong></li>
+                            <li>Press any key to continue</li>
+                            <li>Results will be displayed automatically</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentResult = null;
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImage = document.getElementById('previewImage');
+        const imageInfo = document.getElementById('imageInfo');
+        const imageName = document.getElementById('imageName');
+        const processBtn = document.getElementById('processBtn');
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block';
+                imageName.textContent = `Selected: ${file.name}`;
+                imageInfo.style.display = 'block';
+                processBtn.disabled = false;
+                hideResults();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function processImage() {
+            const fileInput = document.getElementById('imageInput');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showError('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            showLoading();
+            hideResults();
+
+            fetch('/api/process', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    currentResult = data;
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Processing failed');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('Error: ' + error.message);
+            });
+        }
+
+        function processDefaultImage() {
+            showLoading();
+            hideResults();
+
+            fetch('/api/default-image', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    currentResult = data;
+                    imageName.textContent = 'Using: Default Image';
+                    imageInfo.style.display = 'block';
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Processing failed');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('Error: ' + error.message);
+            });
+        }
+
+        function displayResults(data) {
+            // Show results container
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.style.display = 'block';
+            resultsContainer.classList.add('show');
+            
+            // Show success message
+            document.getElementById('successAlert').style.display = 'block';
+            document.getElementById('errorAlert').style.display = 'none';
+
+            // Display metrics
+            document.getElementById('footLength').textContent = data.foot_length_cm.toFixed(2);
+            document.getElementById('shoeSize').textContent = data.uk_shoe_size;
+            document.getElementById('metricsRow').style.display = 'flex';
+
+            // Display annotated image
+            if (data.annotated_image) {
+                document.getElementById('annotatedImage').src = data.annotated_image;
+                document.getElementById('annotatedImageContainer').style.display = 'block';
+            }
+
+            // Display technical details
+            document.getElementById('pixelDistance').textContent = data.pixel_distance.toFixed(2);
+            document.getElementById('scaleFactor').textContent = data.scale_factor_mm_per_pixel.toFixed(4);
+            document.getElementById('technicalDetails').style.display = 'block';
+
+            // Scroll to results
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showError(message) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.style.display = 'block';
+            resultsContainer.classList.add('show');
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorAlert').style.display = 'block';
+            document.getElementById('successAlert').style.display = 'none';
+            document.getElementById('metricsRow').style.display = 'none';
+            document.getElementById('annotatedImageContainer').style.display = 'none';
+            document.getElementById('technicalDetails').style.display = 'none';
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            processBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+            processBtn.disabled = false;
+        }
+
+        function hideResults() {
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('resultsContainer').classList.remove('show');
+        }
+
+        function downloadResult() {
+            if (!currentResult || !currentResult.annotated_image) {
+                showError('No result image available');
+                return;
+            }
+
+            // Convert base64 to blob and download
+            const link = document.createElement('a');
+            link.href = currentResult.annotated_image;
+            link.download = 'foot_measurement_result.jpg';
+            link.click();
+        }
+
+        function downloadReport() {
+            if (!currentResult) {
+                showError('No result data available');
+                return;
+            }
+
+            // Prepare data for report
+            const reportData = {
+                foot_length_cm: currentResult.foot_length_cm,
+                uk_shoe_size: currentResult.uk_shoe_size,
+                pixel_distance: currentResult.pixel_distance,
+                scale_factor_mm_per_pixel: currentResult.scale_factor_mm_per_pixel,
+                annotated_image: currentResult.annotated_image
+            };
+
+            // Create form and submit to download endpoint
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/api/download-report';
+            form.style.display = 'none';
+
+            // Add data as hidden input (we'll use fetch instead)
+            fetch('/api/download-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reportData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Report generation failed');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `foot_size_report_${currentResult.foot_length_cm.toFixed(1)}cm.html`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                showError('Error downloading report: ' + error.message);
+            });
+        }
+
+        function showAbout() {
+            const modal = new bootstrap.Modal(document.getElementById('aboutModal'));
+            modal.show();
+        }
+    </script>
+</body>
+</html>
