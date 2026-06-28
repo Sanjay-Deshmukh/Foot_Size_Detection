@@ -1,6 +1,11 @@
 # Foot Size Detector 
 
 A professional, modern web application built with Flask and beautiful HTML/CSS/JavaScript.
+## Dashboard
+
+<p align="center">
+  <img src="./dashboard.png" alt="Dashboard Screenshot" width="900"/>
+</p>
 
 ## 🚀 Quick Start
 
